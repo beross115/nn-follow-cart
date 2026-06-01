@@ -1,0 +1,18 @@
+{
+  "appDistribution": {
+    "android": {
+      "appId": "1:PLACEHOLDER:android:nnfollowcart",
+      "releaseNotes": "Initial scaffold: BLE scan, distance estimate, battery gauge, FOLLOW ME toggle"
+    }
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "nn-follow-cart",
+          "appId": "1:PLACEHOLDER:android:nnfollowcart"
+        }
+      }
+    }
+  }
+}

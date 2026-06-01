@@ -89,6 +89,24 @@ nn-follow-cart/
 
 Let's get this thing built. Questions? Comments? Let's iterate.
 
-**Status**: Kickoff complete. Repo initialized. Next: hardware prototype and first BLE RSSI test.
+**Status**: Phase 2 in progress — Flutter mobile app scaffolded (BLE foundation, distance/battery UI, FOLLOW ME toggle). Firebase App Distribution docs + firebase.json added. Hardware exists; firmware pending. Next: ESP32 BLE advertising + real GATT integration.
 
 *Project maintained under the Naomi Nagata "get it done" protocol. No excuses, just fixes.*
+## Mobile App (Flutter)
+
+Scaffolded in `app/`:
+
+- **Core UI**: Live distance estimate (m), battery %, RSSI, status
+- **BLE Foundation**: flutter_blue_plus with scan, connect, simulated telemetry (replace with real GATT)
+- **FOLLOW ME**: Primary action button to toggle following mode (sends control command placeholder)
+- **Permissions**: Bluetooth + Location handled
+- **State**: Provider for reactive updates
+
+See `docs/app/firebase-app-distribution.md` and `app/lib/main.dart` for implementation.
+
+**To run**:
+```bash
+cd app
+flutter pub get
+flutter run
+```
