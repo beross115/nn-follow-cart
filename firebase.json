@@ -2,8 +2,8 @@
   "appDistribution": {
     "android": {
       "appId": "1:987654321098:android:nnfollowcart123456",
-      "releaseNotes": "Initial scaffold: BLE scan, distance estimate, battery gauge, FOLLOW ME toggle. Install via Firebase App Distribution link.",
-      "testers": "tester@beltalowda.dev, josephus@nao.dev"
+      "releaseNotes": "Automated CI build from GitHub Actions. BLE RSSI following app.",
+      "groups": "bel talowda-testers"
     }
   },
   "flutter": {
