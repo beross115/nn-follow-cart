@@ -4,7 +4,17 @@
 
 **App:** Flutter-based companion app (`nn-follow-cart/app`)
 
-**Prerequisites**
+**Prerequisites (Primary: Firebase App Distribution Link)**
+- **Recommended:** Install via Firebase App Distribution link (no USB, no Flutter, no computer needed). See `firebase-app-distribution.md` for link and tester signup.
+- Alternative (devs only): Flutter SDK + USB debugging for local builds.
+
+**Link Install (No USB Required)**
+1. Open the Firebase App Distribution link on your Android device.
+2. Sign in and tap Install — app downloads and installs automatically.
+3. Launch app, grant Bluetooth + Location permissions.
+4. Proceed to testing sections below.
+
+**Local USB Prerequisites (for developers)**
 - Flutter SDK installed and `flutter doctor` clean (Android toolchain configured)
 - Physical Samsung S24 Ultra connected via USB with USB debugging enabled
 - App built and installed: `cd app && flutter run --release` (or debug)

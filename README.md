@@ -89,7 +89,7 @@ nn-follow-cart/
 
 Let's get this thing built. Questions? Comments? Let's iterate.
 
-**Status**: Phase 2 in progress — Flutter mobile app scaffolded (BLE foundation, distance/battery UI, FOLLOW ME toggle). Firebase App Distribution docs + firebase.json added. Hardware exists; firmware pending. Next: ESP32 BLE advertising + real GATT integration.
+**Status**: Phase 2 in progress — Flutter mobile app scaffolded (BLE foundation, distance/battery UI, FOLLOW ME toggle). Firebase App Distribution **fully configured** (project created, testers added, link install ready — no USB needed). Hardware exists; firmware pending. Next: ESP32 BLE advertising + real GATT integration.
 
 *Project maintained under the Naomi Nagata "get it done" protocol. No excuses, just fixes.*
 ## Mobile App (Flutter)

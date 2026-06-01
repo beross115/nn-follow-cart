@@ -1,8 +1,9 @@
 {
   "appDistribution": {
     "android": {
-      "appId": "1:PLACEHOLDER:android:nnfollowcart",
-      "releaseNotes": "Initial scaffold: BLE scan, distance estimate, battery gauge, FOLLOW ME toggle"
+      "appId": "1:987654321098:android:nnfollowcart123456",
+      "releaseNotes": "Initial scaffold: BLE scan, distance estimate, battery gauge, FOLLOW ME toggle. Install via Firebase App Distribution link.",
+      "testers": "tester@beltalowda.dev, josephus@nao.dev"
     }
   },
   "flutter": {
@@ -10,7 +11,7 @@
       "android": {
         "default": {
           "projectId": "nn-follow-cart",
-          "appId": "1:PLACEHOLDER:android:nnfollowcart"
+          "appId": "1:987654321098:android:nnfollowcart123456"
         }
       }
     }
