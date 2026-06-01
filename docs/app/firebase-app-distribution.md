@@ -7,7 +7,7 @@ Firebase App Distribution is used for internal testing releases of the Flutter m
 
 **Android App ID:** 1:987654321098:android:nnfollowcart123456
 
-**Tester Group:** bel talowda-testers (includes tester@beltalowda.dev, josephus@nao.dev)
+**Tester Group:** bel talowda-testers (includes beross15@gmail.com)
 
 ## Prerequisites (for maintainers)
 - Firebase CLI installed: `npm install -g firebase-tools`
@@ -31,7 +31,7 @@ Firebase App Distribution is used for internal testing releases of the Flutter m
 4. **Testers Added**
    - Testers invited via Firebase console or CLI:
      ```
-     firebase appdistribution:testers:add tester@beltalowda.dev josephus@nao.dev --project nn-follow-cart
+     firebase appdistribution:testers:add beross15@gmail.com --project nn-follow-cart
      ```
    - They receive email invite with install link.
    - Group `bel talowda-testers` created and populated.
