@@ -29,32 +29,23 @@
 | GND                   | Ground                       | SD0                    | SDMMC Data 0            |
 | 5V                    | 5V input (USB or external)   | CLK                    | SDMMC Clock             |
 
-**Note on pin numbering**: Physical layout matches the photographed ESP32-S3 NodeMCU board exactly. The back-side photo confirmed silkscreen labels and trace routing align with standard front-facing orientation (USB-C top). Silkscreen labels (D0–D39, 3V3, GND, VIN, EN, VP, VN) are authoritative. GPIO numbers shown for reference. ESP32-S3 variant uses same physical pinout as many NodeMCU clones but with S3 silicon (native USB CDC, different strapping). Always cross-check against your specific board before wiring.
+**Note on pin numbering**: Physical layout matches the provided photo exactly. Silkscreen labels are authoritative. SD0–SD3 + CLK are dedicated SDMMC pins. Always cross-check against your specific board before wiring.
 
 ## Project-Specific Pin Assignments (Proposed)
 
 - **Motors (TB6612FNG)**: 
-  - PWM Left: GPIO25 (D25)
-  - PWM Right: GPIO26 (D26)
-  - DIR Left: GPIO14 (D14)
-  - DIR Right: GPIO27 (D27)
-  - STBY: GPIO4 (D4)
-- **Battery Monitor**: GPIO36 / VP (D36) via voltage divider
-- **Status LED**: GPIO13 (D13)
-- **Buzzer**: GPIO5 (D5)
-- **Programming**: GPIO0 (D0 BOOT), GPIO1 (D1 TX), GPIO3 (D3 RX)
-- **Free GPIOs for expansion**: 32, 33, 34, 35, 39
-
-## LED Blink Sketch Status
-
-Board connected via /dev/ttyUSB0. Serial monitor shows no readable output (expected for basic blink sketch without Serial.begin). LED blink sketch appears active based on prior upload; status LED on GPIO13 is presumed blinking per standard "Blink" example adapted for D13. No errors detected on connection. Recommend re-flash if visual confirmation needed.
-
-## Update Instructions
-- Edit this file directly when assigning new pins.
-- Keep descriptions concise but complete.
-- After changes, commit with: `git add docs/pinout.md && git commit -m "docs: update pinout chart to match NodeMCU ESP-32S3 from photo [Naomi Nagata]"`
-
-**"Beltalowda, pin it down right the first time or you'll be chasing ghosts in the wiring."** — Naomi Nagata
+  - PWM Left: GPIO25 (P25)
+  - PWM Right: GPIO26 (P26)
+  - DIR Left: GPIO14 (P14)
+  - DIR Right: GPIO27 (P27)
+  - STBY: GPIO4 (P4)
+- **Battery Monitor**: GPIO36 / SVP (SVP) via voltage divider
+- **Status LED**: GPIO13 (P13)
+- **Buzzer**: GPIO5 (P5)
+- **Programming**: GPIO0 (P0), TX (TX), RX (RX)
+- **SD Card (SDMMC)**: SD0, SD1, SD2, SD3, CLK
+- **Free GPIOs for expansion**: P21, P22, P23, P16, P17, P18, P19, P32, P33, P34, P35
 
 ---
+
 *This file is the single source of truth for hardware connections. No excuses.*
