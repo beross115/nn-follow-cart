@@ -1,0 +1,35 @@
+Requirements from you (Ben) to unblock Firebase App Distribution:
+
+Naomi cannot complete the setup autonomously due to authentication and environment constraints. Here's the precise list of what is needed:
+
+Firebase Project & Access
+Create (or provide access to) a real Firebase project in the Firebase Console.
+Enable App Distribution in that project.
+Create a tester group (or share the project with your account so Naomi can configure it).
+
+Authentication (Critical Blocker)
+Firebase CLI login is browser-based and requires a GUI. Options:
+Provide a Firebase service account JSON key (recommended for CI/headless use), or
+Perform firebase login yourself on a machine with a browser and share the resulting token/refresh credentials.
+
+SDK / Toolchain Installation
+On a development machine (or GitHub Actions runner) with GUI:
+Install Flutter SDK + Android SDK + platform tools + accept licenses.
+Set ANDROID_HOME, JAVA_HOME, and update PATH.
+Run flutter doctor and resolve all issues.
+
+Project Configuration
+Update pubspec.yaml with actual Firebase dependencies.
+Replace placeholder values in firebase.json and add real google-services.json / GoogleService-Info.plist.
+Configure the app in Firebase Console (Android + iOS packages).
+
+Distribution Flow
+Once the above is done, Naomi can:
+Build a signed APK.
+Upload via firebase appdistribution:distribute.
+Generate the tester link.
+
+Preferred path (to match your no-USB preference):
+Provide a Firebase service account + project access → Naomi sets up a GitHub Actions workflow that handles builds + distribution automatically.
+
+Reply with which items you can handle or provide (e.g., service account key, project ID), and Naomi will execute the rest.
