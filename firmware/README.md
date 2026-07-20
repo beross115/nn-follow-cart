@@ -32,15 +32,29 @@ Primary (motors / existing board):
 
 ```bash
 pio run -e primary -t upload --upload-port /dev/ttyUSB0
-pio device monitor -e primary -b 115200
+# dtr/rts forced 0 in platformio.ini — still prefer one long-lived monitor
+pio device monitor -e primary -b 115200 --dtr 0 --rts 0
+# or:
+python3 scripts/serial_watch.py --seconds 0
 ```
 
 Secondary (new ear board — different USB port):
 
 ```bash
 pio run -e secondary -t upload --upload-port /dev/ttyUSB1
-pio device monitor -e secondary -b 115200
+pio device monitor -e secondary -b 115200 --dtr 0 --rts 0
 ```
+
+### Serial watch vs BLE (important)
+
+On this CP2102 devkit, **opening `/dev/ttyUSB0` often pulses EN** and hard-restarts the ESP. That **drops the phone GATT link**. Symptoms: app “keeps disconnecting” whenever someone polls serial.
+
+Rules:
+
+1. Do **not** open/close the serial port repeatedly while testing BLE/joystick.
+2. Prefer **one** hold-open watcher (`scripts/serial_watch.py` or `pio device monitor --dtr 0 --rts 0`).
+3. Expect at most **one** glitch on first open; after that leave the port open.
+4. Flash (`upload`) will always reset — reconnect the app afterward.
 
 Boot markers:
 
