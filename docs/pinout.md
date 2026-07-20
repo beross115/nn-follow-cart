@@ -3,35 +3,37 @@
 **Board**: Custom ESP32 board with USB-C connector (actual user hardware photographed)  
 **Status**: Master reference for wiring. Matches the provided photo exactly.  
 **Last Updated**: 2026-07-20 by Naomi Nagata  
-**Notes**: Two-column layout with USB-C at bottom. All labels taken directly from board silkscreen. Includes dedicated SD card pins (SD0–SD3, CLK). GPIO pins are 3.3V logic.
+**Notes**: Two-column layout with USB-C at top (board rotated 180° vs older bottom-USB chart). All labels taken directly from board silkscreen. Includes dedicated SD card pins (SD0–SD3, CLK). GPIO pins are 3.3V logic.
 
 Planned uses below match firmware `firmware/include/config.h` and the cargo BTS7960 map in [`docs/hardware/bts7960-pinout.md`](hardware/bts7960-pinout.md).
 
-## Physical Pinout (USB-C at Bottom)
+## Physical Pinout (USB-C at Top)
+
+Viewed looking at the top of the board with **USB-C at the top**. Left/right are as you see them in that orientation (180° from the old USB-bottom chart).
 
 | Left Row (Silkscreen) | Description | Planned use / function | Right Row (Silkscreen) | Description | Planned use / function |
 |-----------------------|-------------|------------------------|------------------------|-------------|------------------------|
-| 3V3 | 3.3V regulated output | ESP rail only — **do not** power BTS7960 VCC from here | GND | Ground | Common ground with pack division / motor modules |
-| EN | Chip enable / Reset | Boot / reset button chain | P23 | GPIO23 | Free / spare (SPI candidate) |
-| SVP | GPIO36 / ADC1_CH0 | **Battery pack ADC** (`PIN_BATT_ADC`) via divider | P22 | GPIO22 | Free / spare (SPI candidate) |
-| SVN | GPIO39 / ADC1_CH3 | Free ADC input (optional sense later) | TX | GPIO1 / U0TXD | USB serial programming / logs |
-| P34 | GPIO34 | Free input-only ADC (optional BTS IS sense) | RX | GPIO3 / U0RXD | USB serial programming / logs |
-| P35 | GPIO35 | Free input-only ADC (optional BTS IS sense) | P21 | GPIO21 | Optional dual-ESP **link LED** / heartbeat |
-| P32 | GPIO32 | Free (extra sensor / kill request) | GND | Ground | Common ground |
-| P33 | GPIO33 | Free (extra sensor / kill request) | P19 | GPIO19 | Free / spare (SPI candidate) |
-| P25 | GPIO25 | **Left motor RPWM** (forward PWM) → BTS LEFT RPWM | P18 | GPIO18 | Free / spare (SPI candidate) |
-| P26 | GPIO26 | **Right motor RPWM** (forward PWM) → BTS RIGHT RPWM | P5 | GPIO5 | **Buzzer** (`PIN_BUZZER`) |
-| P27 | GPIO27 | **Right motor LPWM** (reverse PWM) → BTS RIGHT LPWM | P17 | GPIO17 | Dual-ESP UART2 **TX** → secondary RX (fallback link) |
-| P14 | GPIO14 | **Left motor LPWM** (reverse PWM) → BTS LEFT LPWM | P16 | GPIO16 | Dual-ESP UART2 **RX** ← secondary TX (fallback link) |
-| P12 | GPIO12 | Avoid motors (strapping / flash risk) — leave free | P4 | GPIO4 | **Motor EN** — R_EN+L_EN on **both** BTS7960 modules |
-| GND | Ground | Common ground | P0 | GPIO0 (BOOT) | Boot strap / programming hold |
-| P13 | GPIO13 | **Status LED** (`PIN_STATUS_LED`) | P2 | GPIO2 | Avoid motors (boot LED / strapping) — leave free |
-| SD2 | SDMMC Data 2 | Keep free of motor wiring (onboard SD) | P15 | GPIO15 | Avoid motors (strapping) — leave free |
-| SD3 | SDMMC Data 3 | Keep free of motor wiring (onboard SD) | SD1 | SDMMC Data 1 | Keep free of motor wiring (onboard SD) |
-| GND | Ground | Common ground | SD0 | SDMMC Data 0 | Keep free of motor wiring (onboard SD) |
-| 5V | 5V input (USB or external) | Board 5 V in; BTS **logic VCC from separate 5 V buck** | CLK | SDMMC Clock | Keep free of motor wiring (onboard SD) |
+| CLK | SDMMC Clock | Keep free of motor wiring (onboard SD) | 5V | 5V input (USB or external) | Board 5 V in; BTS **logic VCC from separate 5 V buck** |
+| SD0 | SDMMC Data 0 | Keep free of motor wiring (onboard SD) | GND | Ground | Common ground |
+| SD1 | SDMMC Data 1 | Keep free of motor wiring (onboard SD) | SD3 | SDMMC Data 3 | Keep free of motor wiring (onboard SD) |
+| P15 | GPIO15 | Avoid motors (strapping) — leave free | SD2 | SDMMC Data 2 | Keep free of motor wiring (onboard SD) |
+| P2 | GPIO2 | Avoid motors (boot LED / strapping) — leave free | P13 | GPIO13 | **Status LED** (`PIN_STATUS_LED`) |
+| P0 | GPIO0 (BOOT) | Boot strap / programming hold | GND | Ground | Common ground |
+| P4 | GPIO4 | **Motor EN** — R_EN+L_EN on **both** BTS7960 modules | P12 | GPIO12 | Avoid motors (strapping / flash risk) — leave free |
+| P16 | GPIO16 | Dual-ESP UART2 **RX** ← secondary TX (fallback link) | P14 | GPIO14 | **Left motor LPWM** (reverse PWM) → BTS LEFT LPWM |
+| P17 | GPIO17 | Dual-ESP UART2 **TX** → secondary RX (fallback link) | P27 | GPIO27 | **Right motor LPWM** (reverse PWM) → BTS RIGHT LPWM |
+| P5 | GPIO5 | **Buzzer** (`PIN_BUZZER`) | P26 | GPIO26 | **Right motor RPWM** (forward PWM) → BTS RIGHT RPWM |
+| P18 | GPIO18 | Free / spare (SPI candidate) | P25 | GPIO25 | **Left motor RPWM** (forward PWM) → BTS LEFT RPWM |
+| P19 | GPIO19 | Free / spare (SPI candidate) | P33 | GPIO33 | Free (extra sensor / kill request) |
+| GND | Ground | Common ground | P32 | GPIO32 | Free (extra sensor / kill request) |
+| P21 | GPIO21 | Optional dual-ESP **link LED** / heartbeat | P35 | GPIO35 | Free input-only ADC (optional BTS IS sense) |
+| RX | GPIO3 / U0RXD | USB serial programming / logs | P34 | GPIO34 | Free input-only ADC (optional BTS IS sense) |
+| TX | GPIO1 / U0TXD | USB serial programming / logs | SVN | GPIO39 / ADC1_CH3 | Free ADC input (optional sense later) |
+| P22 | GPIO22 | Free / spare (SPI candidate) | SVP | GPIO36 / ADC1_CH0 | **Battery pack ADC** (`PIN_BATT_ADC`) via divider |
+| P23 | GPIO23 | Free / spare (SPI candidate) | EN | Chip enable / Reset | Boot / reset button chain |
+| GND | Ground | Common ground with pack division / motor modules | 3V3 | 3.3V regulated output | ESP rail only — **do not** power BTS7960 VCC from here |
 
-**Note on pin numbering**: Physical layout matches the provided photo exactly. Silkscreen labels are authoritative. SD0–SD3 + CLK are dedicated SDMMC pins. Always cross-check against your specific board before wiring.
+**Note on pin numbering**: Table is **USB-C at top** (180° rotate of the older USB-bottom view — rows reversed **and** left/right swapped). Silkscreen labels are authoritative. SD0–SD3 + CLK are dedicated SDMMC pins. Always cross-check against your specific board before wiring.
 
 ## Project-Specific Pin Assignments
 
