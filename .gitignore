@@ -1,0 +1,46 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Secrets / local machine paths
+.env
+.env.*
+!.env.example
+**/.env
+**/key.properties
+**/*.jks
+**/*.keystore
+**/google-services.json
+**/GoogleService-Info.plist
+**/local.properties
+
+# Flutter / Dart (also covered under app/.gitignore)
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/build/
+**/coverage/
+**/*.iml
+**/.idea/
+
+# Android / Gradle local caches
+**/.gradle/
+**/.kotlin/
+**/captures/
+
+# PlatformIO build tree
+**/.pio/
+
+# Python
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs / temp
+*.log
+*.tmp
+.cache/

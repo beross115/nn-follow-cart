@@ -79,17 +79,17 @@ No over-engineering. Get the cart moving first, then refine.
 
 ```
 nn-follow-cart/
-├── firmware/          # ESP32 code (ESP-IDF or Arduino)
+├── firmware/          # ESP32 PlatformIO + NimBLE (builds)
 ├── app/               # Flutter mobile app
-├── hardware/          # KiCad / 3D models / BOM
-├── docs/              # Calibration guides, wiring diagrams
+├── dist/              # Release APK
+├── docs/              # Pinout, BLE protocol, app testing
 ├── README.md
-└── .github/           # CI, issues templates
+└── .github/           # CI
 ```
 
 Let's get this thing built. Questions? Comments? Let's iterate.
 
-**Status**: Phase 2 in progress — Flutter mobile app scaffolded (BLE foundation, distance/battery UI, FOLLOW ME toggle). Firebase App Distribution **fully configured** (project created, testers added, link install ready — no USB needed). Hardware exists; firmware pending. Next: ESP32 BLE advertising + real GATT integration.
+**Status**: Phase 2 — Flutter app installable (APK in `dist/`). ESP32 firmware **scaffolded and builds** under `firmware/` (NimBLE peripheral `NN-CART`, motors, RSSI follow). Next: flash board, wire app to real GATT (drop simulation), floor-tune RSSI/motors.
 
 *Project maintained under the Naomi Nagata "get it done" protocol. No excuses, just fixes.*
 ## Mobile App (Flutter)

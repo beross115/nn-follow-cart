@@ -12,14 +12,14 @@ dependencies:
   cupertino_icons: ^1.0.6
   # BLE communication foundation
   flutter_blue_plus: ^1.32.0
-  # Firebase for App Distribution and future analytics/crashlytics
-  firebase_core: ^3.2.0
   # State management for live updates (distance, battery, status)
   provider: ^6.1.2
   # Permissions for BLE/location
   permission_handler: ^11.3.1
   # For distance calculation utils
   vector_math: ^2.1.4
+  # firebase_core intentionally omitted until real Firebase config lands
+
 
 dev_dependencies:
   flutter_test:
