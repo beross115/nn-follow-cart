@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -479,14 +480,25 @@ class _CartDashboardState extends State<CartDashboard> {
 
   Future<void> _writeDrive(CartState state, int left, int right) async {
     final c = state.controlChar;
-    if (c == null || !state.isConnected) return;
+    if (c == null || !state.isConnected) {
+      if (mounted && _joyActive) {
+        setState(() => scanStatus = 'Drive blocked — reconnect (no control char)');
+      }
+      return;
+    }
     left = left.clamp(-100, 100);
     right = right.clamp(-100, 100);
     int i8(int v) => v < 0 ? (256 + v) : v;
     final pkt = <int>[kCtrlDrive, i8(left), i8(right)];
     try {
-      await c.write(pkt, withoutResponse: c.properties.writeWithoutResponse);
-    } catch (_) {}
+      // Prefer write-without-response for ~12 Hz stick stream.
+      final noRsp = c.properties.writeWithoutResponse;
+      await c.write(pkt, withoutResponse: noRsp);
+    } catch (e) {
+      if (mounted) {
+        setState(() => scanStatus = 'DRIVE write failed: $e');
+      }
+    }
   }
 
   void _joystickToTracks(double x, double y, void Function(int l, int r) out) {
@@ -603,142 +615,228 @@ class _CartDashboardState extends State<CartDashboard> {
         title: const Text('NN Follow Cart'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
+      // Stick lives OUTSIDE any scroll view so vertical pans never become page scroll.
       body: Consumer<CartState>(
         builder: (context, cartState, _) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Text('STATUS',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 8),
-                        Text(
-                          cartState.status,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: cartState.isFollowing
-                                ? Colors.green
-                                : cartState.isManual
-                                    ? Colors.deepPurple
-                                    : Colors.orange,
-                          ),
+          return Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  children: [
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            Text('STATUS',
+                                style: Theme.of(context).textTheme.titleMedium),
+                            const SizedBox(height: 8),
+                            Text(
+                              cartState.status,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: cartState.isFollowing
+                                    ? Colors.green
+                                    : cartState.isManual
+                                        ? Colors.deepPurple
+                                        : Colors.orange,
+                              ),
+                            ),
+                            Text(
+                                'RSSI: ${cartState.rssi.toStringAsFixed(0)} dBm'),
+                            if (scanStatus.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                scanStatus,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        Text('RSSI: ${cartState.rssi.toStringAsFixed(0)} dBm'),
-                        if (scanStatus.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            scanStatus,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.grey.shade700,
-                              fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Card(
+                            color: Colors.blue.shade50,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                children: [
+                                  Text('DISTANCE',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge),
+                                  Text(
+                                    '${cartState.estimatedDistance.toStringAsFixed(1)} m',
+                                    style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const Text('Target: ~2.0 m'),
+                                ],
+                              ),
                             ),
                           ),
-                        ],
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Card(
+                            color: Colors.green.shade50,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                children: [
+                                  Text('BATTERY',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge),
+                                  Text(
+                                    '${cartState.batteryPercent}%',
+                                    style: const TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  LinearProgressIndicator(
+                                    value: cartState.batteryPercent / 100,
+                                    backgroundColor: Colors.grey.shade300,
+                                    color: cartState.batteryPercent > 20
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        color: Colors.blue.shade50,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              const Icon(Icons.straighten, size: 40),
-                              const SizedBox(height: 8),
-                              Text('DISTANCE',
-                                  style:
-                                      Theme.of(context).textTheme.labelLarge),
-                              Text(
-                                '${cartState.estimatedDistance.toStringAsFixed(1)} m',
-                                style: const TextStyle(
-                                    fontSize: 32, fontWeight: FontWeight.bold),
-                              ),
-                              const Text('Target: ~2.0 m'),
-                            ],
-                          ),
-                        ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: () => _toggleFollowMe(cartState),
+                      icon: Icon(cartState.isFollowing
+                          ? Icons.stop
+                          : Icons.play_arrow),
+                      label: Text(
+                        cartState.isFollowing
+                            ? 'STOP FOLLOWING'
+                            : 'FOLLOW ME',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        backgroundColor: cartState.isFollowing
+                            ? Colors.red
+                            : Colors.blue,
+                        foregroundColor: Colors.white,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Card(
-                        color: Colors.green.shade50,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              const Icon(Icons.battery_full, size: 40),
-                              const SizedBox(height: 8),
-                              Text('BATTERY',
-                                  style:
-                                      Theme.of(context).textTheme.labelLarge),
-                              Text(
-                                '${cartState.batteryPercent}%',
-                                style: const TextStyle(
-                                    fontSize: 32, fontWeight: FontWeight.bold),
-                              ),
-                              LinearProgressIndicator(
-                                value: cartState.batteryPercent / 100,
-                                backgroundColor: Colors.grey.shade300,
-                                color: cartState.batteryPercent > 20
-                                    ? Colors.green
-                                    : Colors.red,
-                              ),
-                            ],
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: isScanning ? null : _startScan,
+                            icon: const Icon(Icons.search),
+                            label: Text(
+                                isScanning ? 'SCANNING…' : 'SCAN FOR CART'),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: cartState.isConnected
+                                ? () => _disconnect(cartState)
+                                : null,
+                            icon: const Icon(Icons.bluetooth_disabled),
+                            label: const Text('DISCONNECT'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Show all BLE (debug)'),
+                      value: showAllBle,
+                      onChanged: (v) => setState(() => showAllBle = v),
+                    ),
+                    if (cartHits.isNotEmpty) ...[
+                      Text('Carts',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      ...cartHits.map((result) => ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.shopping_cart),
+                            title: Text(_displayName(result)),
+                            subtitle: Text(
+                                'RSSI: ${result.rssi} dBm  ·  ${result.device.remoteId}'),
+                            trailing: ElevatedButton(
+                              onPressed: () =>
+                                  _connectToDevice(result.device),
+                              child: const Text('Connect'),
+                            ),
+                          )),
+                    ],
+                    if (showAllBle && _otherBle.isNotEmpty) ...[
+                      Text('Other BLE',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      ..._otherBle.take(20).map((result) => ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading:
+                                const Icon(Icons.bluetooth, size: 20),
+                            title: Text(_displayName(result),
+                                style: const TextStyle(fontSize: 13)),
+                            subtitle: Text('RSSI ${result.rssi}'),
+                            trailing: TextButton(
+                              child: const Text('Connect'),
+                              onPressed: () =>
+                                  _connectToDevice(result.device),
+                            ),
+                          )),
+                    ],
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Board: NN-Follow-Cart (primary only). Stick sends CTRL_DRIVE; '
+                      'firmware stops if packets pause >400 ms.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: () => _toggleFollowMe(cartState),
-                  icon: Icon(
-                      cartState.isFollowing ? Icons.stop : Icons.play_arrow),
-                  label: Text(
-                    cartState.isFollowing ? 'STOP FOLLOWING' : 'FOLLOW ME',
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    backgroundColor:
-                        cartState.isFollowing ? Colors.red : Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  color: Colors.deepPurple.shade50,
+              ),
+              // Fixed manual-drive dock — not inside ListView.
+              Material(
+                elevation: 10,
+                color: Colors.deepPurple.shade50,
+                child: SafeArea(
+                  top: false,
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text('MANUAL DRIVE',
                             style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           cartState.isConnected
-                              ? 'Hold stick · release to stop · overrides FOLLOW'
-                              : 'Connect first',
+                              ? (cartState.isManual
+                                  ? 'Driving… release stick to stop'
+                                  : 'Hold stick · release to stop · overrides FOLLOW')
+                              : 'Connect first — stick disabled',
                           style: TextStyle(
                               color: Colors.grey.shade700, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         IgnorePointer(
                           ignoring: !cartState.isConnected,
                           child: Opacity(
@@ -746,12 +844,13 @@ class _CartDashboardState extends State<CartDashboard> {
                             child: DriveJoystick(
                               size: 200,
                               onChanged: _onJoyChanged,
-                              onActive: () => _startManualStream(cartState),
+                              onActive: () =>
+                                  _startManualStream(cartState),
                               onReleased: () => _stopManualStream(),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
@@ -762,9 +861,10 @@ class _CartDashboardState extends State<CartDashboard> {
                             label: const Text('E-STOP / HALT'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.red.shade800,
-                              side: BorderSide(color: Colors.red.shade400),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 14),
+                              side:
+                                  BorderSide(color: Colors.red.shade400),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12),
                             ),
                           ),
                         ),
@@ -772,78 +872,8 @@ class _CartDashboardState extends State<CartDashboard> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: isScanning ? null : _startScan,
-                        icon: const Icon(Icons.search),
-                        label: Text(isScanning ? 'SCANNING…' : 'SCAN FOR CART'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: cartState.isConnected
-                            ? () => _disconnect(cartState)
-                            : null,
-                        icon: const Icon(Icons.bluetooth_disabled),
-                        label: const Text('DISCONNECT'),
-                      ),
-                    ),
-                  ],
-                ),
-                SwitchListTile(
-                  title: const Text('Show all BLE (debug)'),
-                  value: showAllBle,
-                  onChanged: (v) => setState(() => showAllBle = v),
-                ),
-                if (cartHits.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text('Carts', style: Theme.of(context).textTheme.titleMedium),
-                  ...cartHits.map((result) => ListTile(
-                        leading: const Icon(Icons.shopping_cart),
-                        title: Text(_displayName(result)),
-                        subtitle: Text(
-                            'RSSI: ${result.rssi} dBm  ·  ${result.device.remoteId}'),
-                        trailing: ElevatedButton(
-                          onPressed: () => _connectToDevice(result.device),
-                          child: const Text('Connect'),
-                        ),
-                      )),
-                ],
-                if (showAllBle && _otherBle.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text('Other BLE',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  ..._otherBle.take(20).map((result) => ListTile(
-                        dense: true,
-                        leading: const Icon(Icons.bluetooth, size: 20),
-                        title: Text(_displayName(result),
-                            style: const TextStyle(fontSize: 13)),
-                        subtitle: Text('RSSI ${result.rssi}'),
-                        trailing: TextButton(
-                          child: const Text('Connect'),
-                          onPressed: () => _connectToDevice(result.device),
-                        ),
-                      )),
-                ],
-                const SizedBox(height: 16),
-                const Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Board advertises as NN-Follow-Cart (control primary only).\n'
-                      'Joystick sends CTRL_DRIVE; firmware stops if packets pause >400 ms.\n'
-                      'Do not keep the cart open in system Bluetooth settings while scanning.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
@@ -870,6 +900,14 @@ class DriveJoystick extends StatefulWidget {
   State<DriveJoystick> createState() => _DriveJoystickState();
 }
 
+/// Wins against parent scrollables in the gesture arena (vertical stick drags).
+class _EagerPanGestureRecognizer extends PanGestureRecognizer {
+  @override
+  void rejectGesture(int pointer) {
+    acceptGesture(pointer);
+  }
+}
+
 class _DriveJoystickState extends State<DriveJoystick> {
   Offset _knob = Offset.zero; // pixels from center
   bool _down = false;
@@ -884,7 +922,10 @@ class _DriveJoystickState extends State<DriveJoystick> {
     if (d.distance > max) {
       d = Offset.fromDirection(d.direction, max);
     }
-    setState(() => _knob = d);
+    setState(() {
+      _knob = d;
+      _down = true;
+    });
     widget.onChanged(Offset(d.dx / max, d.dy / max));
   }
 
@@ -899,15 +940,29 @@ class _DriveJoystickState extends State<DriveJoystick> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onPanStart: (d) {
-        _down = true;
-        widget.onActive();
-        _update(d.localPosition);
+    return RawGestureDetector(
+      behavior: HitTestBehavior.opaque,
+      gestures: <Type, GestureRecognizerFactory>{
+        _EagerPanGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<_EagerPanGestureRecognizer>(
+          () => _EagerPanGestureRecognizer(),
+          (_EagerPanGestureRecognizer instance) {
+            instance.onStart = (DragStartDetails d) {
+              widget.onActive();
+              _update(d.localPosition);
+            };
+            instance.onUpdate = (DragUpdateDetails d) {
+              _update(d.localPosition);
+            };
+            instance.onEnd = (_) {
+              _reset();
+            };
+            instance.onCancel = () {
+              _reset();
+            };
+          },
+        ),
       },
-      onPanUpdate: (d) => _update(d.localPosition),
-      onPanEnd: (_) => _reset(),
-      onPanCancel: _reset,
       child: SizedBox(
         width: widget.size,
         height: widget.size,
